@@ -62,7 +62,6 @@ function New-ADTestData {
             'City'             = $TestData.Cities
         }
         $MyMS365Users += $MyUser
-        Write-Host "$($MyUser.MobilePhone)"
     }
 
     return $MyMS365Users
