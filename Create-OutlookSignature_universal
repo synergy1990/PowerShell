@@ -1,0 +1,208 @@
+function New-PhoneNumber {
+    [CmdletBinding()]
+    param(
+        $IsMobile = $true
+    )
+
+    $MobilePrefixes = @("151", "160", "170", "171", "175", "152", "162", "172", "173", "174", "157", "163", "177", "178", "159", "176", "179")
+    $Prefixes   = @("2682", "2681", "2686", "2742", "2741", "2246", "2241", "40", "2102", "2161", "2151", "221", "228", "2208", "2206", "2351", "241", "243", "251", "261",
+                    "2631", "2741", "331", "335", "3391", "345", "355", "357", "3581", "361", "375", "381", "4131", "4141", "4161", "421", "4221", "4321", "4371", "4372",
+                    "4431", "4491", "4541", "461", "4721", "4941", "4921", "491", "4971", "5141", "5151", "5191", "521", "5201", "5231", "5251", "5271", "531", "5341",
+                    "6021", "611", "6131", "621", "6221", "6241", "631", "6321", "6331", "6381", "641", "6421", "6441", "6431", "651", "6531", "6561", "6571", "6591",
+                    "671", "6721", "6741", "6761", "6771", "7071", "7121", "7131", "7141", "721", "7221", "7231", "7261", "7271", "751", "7551", "761", "7731", "781",
+                    "8041", "8141", "8151", "8161", "821", "8341", "841", "851", "8651", "8821", "89", "8961", "9091", "9131", "911", "921", "9221", "931", "941", "951")
+    $RndSevenOrEight = Get-Random -Minimum 7 -Maximum 9
+    $ActualNumber = ""    
+    for($i = 1; $i -le $RndSevenOrEight; $i++) {
+        $rnd = Get-Random -Minimum 0 -Maximum 10
+        $ActualNumber = $ActualNumber + $(Get-Random -Minimum 0 -Maximum 10).ToString()
+    }
+
+    if($IsMobile) {
+        $PhoneNumber = "+49 " + $($MobilePrefixes | Get-Random) + " " + $ActualNumber
+    } else {
+        $PhoneNumber = "+49 " + $($Prefixes | Get-Random) + " " + $ActualNumber
+    }
+
+    return $PhoneNumber
+
+}
+
+function New-ADTestData {
+    [CmdletBinding()]
+    param(
+        $Count = 5
+    )
+    
+    $TestData = @{
+            'HomePhones'        = "i.A."
+            'GivenNames'        = @("Klaus", "Dieter", "Franz", "Xaver", "Vivian", "Anne", "Michaela", "Manuela", "Eric", "Christine", "Chiara", "Detlef", "Angela", "Wilfried", "Michael", "Ingrid",
+                                    "Theresa", "Moritz", "Sophia", "Philipp", "Dorothea", "Felix", "Sarah", "Sebastian", "Anna", "Clemens", "Christiane", "Jan", "Maria", "Oliver", "Alexandra", "Paul",
+                                     "Astrid", "Cornelius", "Elisabeth", "Patrick", "Anika", "Tobias", "Julia", "Maximilian", "Hannah", "David", "Karla", "Theo", "Edith", "Tim")
+            'SurNames'          = @("König", "Böttcher", "Honig", "Berger", "Tortenhuber", "Reiter", "Engel", "Pracht", "Marenbach", "Hüsch", "Au", "Kurz", "Lang", "Krause", "Schröder", "Werner",
+                                    "Müller", "Schmidt", "Schneider", "Fischer", "Weber", "Meyer", "Wagner", "Becker", "Schulz", "Hoffmann", "Schäfer", "Bauer", "Koch", "Richter", "Wolf", "Neumann",
+                                    "Schwarz", "Braun", "Hofmann", "Zimmermann", "Schmitt", "Hartmann", "Krüger", "Schmid", "Lange", "Schmitz", "Meier", "Maier", "Lehmann", "Huber")
+           #'SamAccountName'    = @()
+            'Departments'       = @("developement", "accounting", "workshop", "sales", "purchasing", "logistics", "IT", "construction", "marketing", "management", "human resources", "research", "production", "service")
+            'Titles'            = @("Entwicklung", "Buchhaltung", "Werkstatt", "Vertrieb", "Einkauf", "Logistik", "IT", "Konstruktion", "Marketing", "Geschäftsführung", "Personalwesen", "Forschung", "Produktion", "Kundendienst")
+           #'MobilePhones'      = @()
+            'telephoneNumbers'  = "+49 2682 11111-"
+            'Faxes'             = "+49 2682 11111-50"
+           #'EMailAddress'      = @()
+            'HomePages'         = "www.testfirma.de.vu"
+            'StreetAddresses'   = "Panzerknackerstrasse 5"
+            'PostalCodes'       = "47111"
+            'Cities'            = "Entenhausen"
+    }
+    
+    $MyMS365Users = @()
+    for($i = 1; $i -le $Count; $i++) {
+        $DeptCount = $($TestData.Departments.Length)
+        $RandomNumber = Get-Random -Minimum 0 -Maximum $Deptcount
+        $GivenName = $TestData.GivenNames | Get-Random
+        $SurName = $TestData.SurNames | Get-Random
+        $MyUser = New-Object -TypeName PSObject -Property @{
+            'UserID'           = $i
+            'HomePhone'        = $TestData.HomePhones
+            'GivenName'        = $GivenName
+            'SurName'          = $SurName
+            'SamAccountName'   = "$($GivenName).$($SurName)"
+            'Department'       = $TestData.Departments[$RandomNumber]
+            'Title'            = $TestData.Titles[$RandomNumber]
+            'MobilePhone'      = New-PhoneNumber -IsMobile $true
+           #'telephoneNumber'  = $TestData.telephoneNumbers + $(Get-Random -Minimum 10 -Maximum 100).ToString()
+            'telephoneNumber'  = New-PhoneNumber -IsMobile $false
+            'Fax'              = $TestData.Faxes
+            'EMailAddress'     = "$($GivenName).$($SurName)@$(($TestData.HomePages).Trim("www."))"
+            'HomePage'         = $TestData.HomePages
+            'StreetAddress'    = $TestData.StreetAddresses
+            'PostalCode'       = $TestData.PostalCodes
+            'City'             = $TestData.Cities
+        }
+        $MyMS365Users += $MyUser
+    }
+
+    return $MyMS365Users
+}
+
+function New-IndividualSignatures {
+    [CmdletBinding()]
+    $Signature = @{
+        'Fonts'             = @("Arial", "Times New Roman", "Verdana", "Calibri", "Calibri Light", "Ubuntu", "Ubuntu Light")
+        'ExportPath'        = "C:\Test\EMailSignaturen"
+        'Colors'            = @("#000000", "#FFFFFF", "#a00515", "#a0a0a0", "#22b14c")
+        'FontSizes'         = @("0pt", "1pt", "2pt", "3pt", "4pt", "5pt", "6pt", "7pt", "8pt", "9pt", "10pt", "11pt", "12pt", "13pt", "14pt", "15pt", "16pt", "17pt", "18pt", "19pt", "20pt")
+        'ImagePathRoot'     = "C:\Test\Bilder"
+        'Images'            = @("testfirma_logo.jpg", "testfirma_iso.jpg")
+    }
+
+    $CompanyInformation = @{
+        'FullName'          = "Testfirma GmbH &amp Co. KG"
+        'ShortName'         = "Testfirma"
+        'CEOs'              = @("Dagobert Duck", "Horst-Kevin König", "Gustav Gans")
+        'USTID'             = "DE 123456789"
+        'CountryCourt'      = "Amtsgericht Entenhausen, HRA 55555"
+        # Since we are going to use HTML, we need to Escape "&" (e.g.)
+        'LegalForm'         = "GmbH &amp; Co. KG"
+		'City'				= "Entenhausen"
+		'Street'			= "Panzerknackerstraße 5"
+		'ZIP'				= "47111"
+    }
+
+    $CEOString = ""
+    foreach ($CEO in $CompanyInformation.CEOs) {
+        $CEOString += $CEO
+        $CEOString += ", "
+    }
+    
+    
+    $DisclosureLines = @(
+    # These lines can be changed in any way you want it to look like.
+        "$($CompanyInformation.FullName), $($CompanyInformation.CountryCourt), Geschäftsführer: $($CEOString) UST-ID-Nr.: $($CompanyInformation.USTID)"
+        "Komplementärin: Testtest Verwaltungs-Gesellschaft mbH, Amtsgericht Entenhausen, HRB 76543"
+    )
+
+    # Create the directory for the to be exported signatures
+    if(!(Test-Path $($Signature.ExportPath))) {
+        New-Item -Path $($Signature.ExportPath) -ItemType Directory
+    }
+
+    # SearchBase = "OU=MyUndermostOU, OU=TheOUAboveThat, OU=TheOUEvenOneLevelHigher, DC=MyDomain, DC=MyTLD
+    # Note: You have to put that in the right order as in the example given
+    $SearchBase = ""
+    if(!($SearchBase)) {
+        $SignatureUsers = New-ADTestData -Count 9
+    } else {
+        $SignatureUsers = Get-ADUser -Filter * -Properties * -SearchBase $SearchBase | Where-Object {($_.SurName -notlike "") -and ($_.Name -notmatch "test")}
+    }
+    $CompanyInformation.Disclosure
+
+    # Generate HTML-code for each user in parts that can be omitted or swapped out in some cases (language, mobile phone)
+    foreach($SignatureUser in $SignatureUsers) {
+    $HTMLCodeReplyPartOne = "<HTML>
+<HEAD><META content=`"text/html; charset=iso-8859-1`" http-equiv=Content-Type></HEAD>
+<BODY>
+<DIV style=`"FONT-FAMILY: $($Signature.Fonts[2]); COLOR: $($Signature.Colors[0]); MARGIN-LEFT: 0px; FONT-SIZE: $($Signature.FontSizes[8])`" align=left>
+<SPAN style=`"MARGIN-TOP: 8px; MARGIN-BOTTOM: 8px`">"
+
+$HTMLCodeReplyPartIA = "<STRONG>$($SignatureUser.HomePhone)</STRONG><BR>"
+
+$HTMLCodeReplyPartAfterIA ="<STRONG>$($SignatureUser.GivenName) $($SignatureUser.Surname)</STRONG><BR>"
+
+$HTMLCodeReplyDE = "$($SignatureUser.Title)<BR><BR>"
+$HTMLCodeReplyEN = "$($SignatureUser.Department)<BR><BR>"
+
+$HTMLCodeReplyPartTwo ="</SPAN>
+<SPAN style=`"MARGIN-TOP: 8px; MARGIN-BOTTOM: 8px`">
+$($SignatureUser.telephoneNumber)<BR>"
+
+$HTMLCodeReplyMobilePhone = ""
+if($($SignatureUser.MobilePhone)) {
+    $HTMLCodeReplyMobilePhone += "$($SignatureUser.MobilePhone)<BR>"
+}
+
+$HTMLCodeReplyPartThree = "Fax: $($SignatureUser.Fax)<BR>
+<A style=`"FONT-FAMILY: $($Signature.Fonts[2]); FONT-SIZE: $($Signature.FontSizes[8])`" HREF=`"MAILTO:$($SignatureUser.EmailAddress)`">$($SignatureUser.EmailAddress)</A><BR>
+<A style=`"FONT-FAMILY: $($Signature.Fonts[2]); FONT-SIZE: $($Signature.FontSizes[8])`" HREF=`"$($SignatureUser.HomePage)`">$($SignatureUser.HomePage)</A><BR><BR></SPAN>
+<SPAN style=`"FONT-FAMILY: $($Signature.Fonts[2]); COLOR: $($Signature.Colors[4]); FONT-SIZE: $($Signature.FontSizes[8])`"><B>$($CompanyInformation.ShortName)</B></SPAN> <SPAN style=`"FONT-FAMILY: $($Signature.Fonts[2]); COLOR: $($Signature.Colors[0]); FONT-SIZE: $($Signature.FontSizes[8])`"><B>$($CompanyInformation.LegalForm)</B> &bull; 
+<SPAN style=`"MARGIN-TOP: 8px; MARGIN-BOTTOM: 8px`">$($CompanyInformation.Street) &bull; $($CompanyInformation.ZIP) $($CompanyInformation.City)<BR></SPAN>"
+
+$HTMLCodeAfterReply = "<BR><IMG SRC=`"$($Signature.ImagePathRoot)\$($Signature.Images[0])`" BORDER=0>&nbsp;&nbsp;&nbsp;<IMG SRC=`"$($Signature.ImagePathRoot)\$($Signature.Images[1])`" BORDER=0>
+<!-- &nbsp;&nbsp;&nbsp;<IMG SRC=`"$($Signature.ImagePathRoot)\$($Signature.Images[2])`" BORDER=0> -->
+<BR>
+<SPAN style=`"FONT-FAMILY: $($Signature.Fonts[2]); COLOR: $($Signature.Colors[3]); FONT-SIZE: $($Signature.FontSizes[8])`">
+<BR>$($DisclosureLines[0])<BR>
+$($DisclosureLines[1])<BR></SPAN><BR>
+</DIV>
+</BODY>
+</HTML>"
+
+    # Generate signatures (full signature, shorter reply-signature - both in DE and EN)
+    $ReplySignatureDE = ""
+    $ReplySignatureEN = ""
+    $FullSignatureDE  = ""
+    $FullSignatureEN  = ""
+    
+    # Add mobilephone number, if specified in AD User-object
+    # "i.A." shall be missing in english version
+    if($($SignatureUser.MobilePhone)) {
+        $ReplySignatureDE = $HTMLCodeReplyPartOne + $HTMLCodeReplyPartIA + $HTMLCodeReplyPartAfterIA + $HTMLCodeReplyDE + $HTMLCodeReplyPartTwo + $HTMLCodeReplyMobilePhone + $HTMLCodeReplyPartThree
+        $ReplySignatureEN = $HTMLCodeReplyPartOne + $HTMLCodeReplyPartAfterIA + $HTMLCodeReplyEN + $HTMLCodeReplyPartTwo + $HTMLCodeReplyMobilePhone + $HTMLCodeReplyPartThree
+        $FullSignatureDE  = $ReplySignatureDE + $HTMLCodeAfterReply
+        $FullSignatureEN  = $ReplySignatureEN + $HTMLCodeAfterReply
+    } else {
+        $ReplySignatureDE = $HTMLCodeReplyPartOne + $HTMLCodeReplyPartIA + $HTMLCodeReplyPartAfterIA + $HTMLCodeReplyDE + $HTMLCodeReplyPartTwo + $HTMLCodeReplyPartThree
+        $ReplySignatureEN = $HTMLCodeReplyPartOne + $HTMLCodeReplyPartAfterIA + $HTMLCodeReplyEN + $HTMLCodeReplyPartTwo + $HTMLCodeReplyPartThree
+        $FullSignatureDE  = $ReplySignatureDE + $HTMLCodeAfterReply
+        $FullSignatureEN  = $ReplySignatureEN + $HTMLCodeAfterReply        
+    }
+
+    # Ausgabe
+    $ReplySignatureDE | Out-File -FilePath "$($Signature.ExportPath)\$($SignatureUser.SamAccountName)-reply-de.htm"
+    $FullSignatureDE  | Out-File -FilePath "$($Signature.ExportPath)\$($SignatureUser.SamAccountName)-neu-de.htm"
+    $ReplySignatureEN | Out-File -FilePath "$($Signature.ExportPath)\$($SignatureUser.SamAccountName)-reply-en.htm"
+    $FullSignatureEN  | Out-File -FilePath "$($Signature.ExportPath)\$($SignatureUser.SamAccountName)-neu-en.htm"
+    }
+}
+
+New-IndividualSignatures
